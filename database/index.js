@@ -54,4 +54,11 @@ const updateArtist = (artistInfo, cb) => {
   });
 }
 
-module.exports = { db, Artist, getArtist, postArtist, updateArtist };
+const deleteArtist = (artistID, cb) => {
+  Artist.deleteOne({ 'artistID': artistID }, (err) => {
+    if (err) throw err;
+    cb();
+  });
+}
+
+module.exports = { db, Artist, getArtist, postArtist, updateArtist, deleteArtist };
