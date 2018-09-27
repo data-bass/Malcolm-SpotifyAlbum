@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const { getArtist, postArtist, updateArtist } = require('../database/index.js');
+const { getArtist, postArtist, updateArtist, deleteArtist } = require('../database/index.js');
 const cors = require('cors');
 const server = express();
 
@@ -33,5 +33,13 @@ server.put('/artists/albums/:artistID', (req, res) => {
     res.send(`Updated the artist at ${artistID} with the data requested`);
   });
 });
+
+server.delete('/artists/albums/:artistID', (req, res) => {
+  const { artistID } = req.params;
+  deleteArtist(artistID, (err) => {
+    // res.status();
+    res.send(`Deleted the artist at ${artistID}`);
+  });
+})
 
 module.exports = server;
