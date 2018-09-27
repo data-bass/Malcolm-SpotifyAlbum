@@ -44,7 +44,14 @@ const postArtist = (artistID, cb) => {
       cb();
     });
   });
-
 }
 
-module.exports = { db, Artist, getArtist, postArtist };
+const updateArtist = (artistInfo, cb) => {
+  const { artistID, data } = artistInfo;
+  Artist.findOneAndUpdate({ 'artistID': artistID }, data, (err, artists) => {
+    if (err) throw err;
+    cb();
+  });
+}
+
+module.exports = { db, Artist, getArtist, postArtist, updateArtist };
