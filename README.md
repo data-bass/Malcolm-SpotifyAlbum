@@ -1,39 +1,26 @@
-# dotThen
+# CRUD API
 
-> An attempt at replicating Spotify's Artist page UI 
+> My server current handles 4 types of API requests in a RESTFUL API manner. Each of these requests manipulate the artists in the data set.
 
-## Related Projects
+> Current Accessible requests: GET, POST, PUT, DELETE
 
-  - https://github.com/teamName/repo
-  - https://github.com/teamName/repo
-  - https://github.com/teamName/repo
-  - https://github.com/teamName/repo
+## GET
+> "/artists/albums/:artistID"
 
-## Table of Contents
+> Recieves all the data associated with the artist at the specified artistID.
 
-1. [Usage](#Usage)
-1. [Requirements](#requirements)
-1. [Development](#development)
+## POST
+> "/artists/albums/:artistID"
 
-## Usage
+> Adds an artist to the dataset with the specified artistID.
 
-> Some usage instructions
+## PUT
+> "/artists/albums/:artistID"
 
-## Requirements
+> Updates an artist to the dataset with the specified artistID, according to the data passed along in the request.
 
-An `nvmrc` file is included if using [nvm](https://github.com/creationix/nvm).
+## DELETE
+> "/artists/albums/:artistID"
 
-- Node 6.13.0
-- etc
-
-## Development
-
-### Installing Dependencies
-
-From within the root directory:
-
-```sh
-npm install -g webpack
-npm install
-```
+> Deletes an artist from the dataset with the specified artistID
 
