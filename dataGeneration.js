@@ -2,10 +2,14 @@ const faker = require('faker');
 const fs = require('fs');
 const coolImages = require('cool-images');
 
-var generateData = () => {
+var generateData = (numToGenerate = 100) => {
+  if (typeof numToGenerate !== 'number' || numToGenerate < 0) {
+    return console.error('Requires a valid number of records to generate, please try again')
+  }
+
   var allArtists = [];
 
-  for (let i = 1; i < 101; i++) {
+  for (let i = 1; i < numToGenerate; i++) {
     let artist = {
       artistID: i,
       artistName: faker.name.findName(),
@@ -37,11 +41,27 @@ var generateData = () => {
     allArtists.push(artist);
   }
 
-  fs.writeFile('data.json', JSON.stringify(allArtists), 'utf8', (err) => {
-    if (err) throw err;
-    console.log("File written!");
-  })
+  return allArtists;
 };
 
-module.exports.generateData = generateData;
+const writeToFile = () => {
+  if (persistingData === undefined || persistingData.length === 0) {
+    return console.error('Current data is undefined or empty, please initialize data');
+  }
+
+  fs.writeFile('data.json', JSON.stringify(persistingData), 'utf8', (err) => {
+    if (err) throw err;
+    console.log("File written!");
+  });
+}
+
+// const dataGeneration = new Promise((resolve, reject) => {
+
+//   resolve()
+// })
+
+let persistingData = generateData() || undefined;
+console.log('I ran the data generation script');
+
+export default { generateData };
 
