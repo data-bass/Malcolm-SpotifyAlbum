@@ -9,7 +9,7 @@ var generateData = (numToGenerate = 100) => {
 
   var allArtists = [];
 
-  for (let i = 1; i < numToGenerate; i++) {
+  for (let i = 1; i < numToGenerate + 1; i++) {
     let artist = {
       artistID: i,
       artistName: faker.name.findName(),
@@ -18,7 +18,7 @@ var generateData = (numToGenerate = 100) => {
     var albumNumber = Math.floor(Math.random() * 4) + 1;
     for (let j = 1; j < albumNumber + 1; j++) {
       let album = {
-        albumID: i * 10 + j,
+        albumID: i * 100 + j,
         albumName: faker.random.words(),
         albumImage: coolImages.one(400, 400),
         publishedYear: Math.floor(Math.random() * 69) + 1950,
@@ -27,7 +27,7 @@ var generateData = (numToGenerate = 100) => {
       var songNumber = Math.floor(Math.random() * 10) + 12;
       for (let k = 1; k < songNumber + 1; k++) {
         let song = {
-          songID: i * 100 + j * 10 + k,
+          songID: i * 1000 + j * 10 + k,
           songName: faker.random.words(),
           streams: Math.floor(Math.random() * 250000000),
           length: Math.floor(Math.random() * 221) + 30,
@@ -55,13 +55,8 @@ const writeToFile = () => {
   });
 }
 
-// const dataGeneration = new Promise((resolve, reject) => {
-
-//   resolve()
-// })
-
 let persistingData = generateData() || undefined;
 console.log('I ran the data generation script');
 
-export default { generateData };
+module.exports = { generateData };
 
