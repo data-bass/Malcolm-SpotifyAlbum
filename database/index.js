@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://root:WissemGamra1@ds211143.mlab.com:11143/artists');
+mongoose.connect('mongodb://localhost:27017/spotify');
 
 const db = mongoose.connection;
+const { generateData } = require('../dataGeneration.js');
+
 
 
 const ArtistSchema = new mongoose.Schema({
@@ -23,15 +25,26 @@ const ArtistSchema = new mongoose.Schema({
   }]
 });
 
-var Artist = mongoose.model('Artist', ArtistSchema);
+const Artist = mongoose.model('Artist', ArtistSchema);
 
-var getArtist = (id, cb) => {
-  Artist.find({'artistID': id}, (err, data) => {
+const getArtist = (artistID, cb) => {
+  Artist.find({ 'artistID': artistID }, (err, data) => {
     if (err) throw err;
     cb(data);
-  })
+  });
 }
 
-module.exports.Artist = Artist;
-module.exports.db = db;
-module.exports.getArtist = getArtist;
+const postArtist = (artistID, cb) => {
+  Artist.count({}, (err, numOfRecords) => {
+    if (err) throw err;
+    let newArtist = generateData(1)[0];
+    newArtist.artistID = numOfRecords + 1;
+    Artist.create(newArtist, (err, data) => {
+      if (err) throw err;
+      cb();
+    });
+  });
+
+}
+
+module.exports = { db, Artist, getArtist, postArtist };
