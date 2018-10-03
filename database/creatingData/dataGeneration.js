@@ -27,7 +27,7 @@ const loopRecords = (artists, outputStream) => new Promise((resolve, reject) => 
 });
 
 const createRecords = async () => {
-  console.log('--------Starting the data generation script---------')
+  console.log('--------Starting the data generation script---------');
   for (var i = 0; i < 2; i++) {
     let dataFile = path.join(__dirname + `/dataFiles/json/data${i}.json`);
     var outputStream = fs.createWriteStream(dataFile); // {flags: 'a'}
