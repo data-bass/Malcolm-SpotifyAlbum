@@ -43,7 +43,7 @@ const createSongs = (currentArtistID, index, albumNumber) => {
   var songNumber = Math.floor(Math.random() * 21) + 9;
   for (var k = 1; k < songNumber + 1; k++) {
     let song = {
-      songID: (currentArtistID + index) * 1000 + albumNumber * 10 + k,
+      songID: (currentArtistID + index) * 1000 + (albumNumber + 1) * 10 + k,
       songName: faker.random.words(),
       streams: Math.floor(Math.random() * 250000000),
       length: Math.floor(Math.random() * 221) + 30,
