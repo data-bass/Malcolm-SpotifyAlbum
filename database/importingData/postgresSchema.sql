@@ -46,3 +46,12 @@
 -- join songs on albums.albumid=songs.albumid
 -- where artists.artistid=999888;
 
+CREATE INDEX id
+ON artists (artistid);
+
+CREATE INDEX id
+ON albums (albumid);
+
+CREATE INDEX id
+ON songs (songid);
+
