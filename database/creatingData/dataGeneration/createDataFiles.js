@@ -3,7 +3,7 @@ const fs = require('fs');
 const coolImages = require('cool-images');
 const ndjson = require('ndjson');
 const path = require('path');
-const { createArtists, createAlbums, createSongs } = require('./dataCreation.js');
+const { createArtists, createAlbums, createSongs } = require('./createArtists.js');
 
 // var generateData = (numToGenerate = 25000, currentArtistID) => new Promise(async (resolve, reject) => {
 const generateData = (numToGenerate = 25000, currentArtistID) => {

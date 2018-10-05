@@ -27,3 +27,6 @@ dist/
 #Created data
 dataFiles/
 
+#General Vscode Data
+.vscode/
+

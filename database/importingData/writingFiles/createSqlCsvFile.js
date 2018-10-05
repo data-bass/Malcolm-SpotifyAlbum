@@ -3,9 +3,9 @@ const coolImages = require('cool-images');
 const path = require('path');
 const fs = require('fs');
 
-var numOfArtists = 1;
-var numOfAlbums = 1;
-var numOfSongs = 1;
+var numOfArtists = 999990;
+var numOfAlbums = 1999980;
+var numOfSongs = 5999940;
 
 let dataFile = undefined;
 let dataFile2 = undefined;
@@ -111,22 +111,23 @@ const closeFileStream = (stream) => new Promise((resolve, reject) => {
   });
 });
 
-const numOfFiles = 10;
+const numOfFiles = 13;
+const startingFile = 11;
 const writeCsvFile = async () => {
   console.log('--------Starting the data generation script---------');
-  for (let j = 0; j < numOfFiles; j++) {
+  for (let j = startingFile; j < numOfFiles; j++) {
     createFileStreams(j);
     await Promise.all([writeHeaders(artistHeaders, dataStream), writeHeaders(albumHeaders, dataStream2), writeHeaders(songHeaders, dataStream3)]);
     for (let i = 1; i < 100000; i++) {
       await createArtist();
       numOfArtists += 1;
     }
-    console.log(`Finished writing ${j + 1} files!`);
+    console.log(`Finished writing file ${j + 1}!`);
     await Promise.all([closeFileStream(dataStream), closeFileStream(dataStream2), closeFileStream(dataStream3)]);
   }
   console.log('-------Finished running the data generation script--------');
 }
 
-// writeCsvFile();
+writeCsvFile();
 
-module.exports = { artistHeaders, albumHeaders, songHeaders, numOfFiles };
+module.exports = { artistHeaders, albumHeaders, songHeaders, numOfFiles, startingFile };
