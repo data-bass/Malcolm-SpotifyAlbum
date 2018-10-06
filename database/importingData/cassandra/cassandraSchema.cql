@@ -15,7 +15,7 @@ CREATE TABLE artists (
   length int, 
   popularity int, 
   addedToLibrary Boolean, 
-  PRIMARY KEY (artistID, albumID, songID)
+  PRIMARY KEY ((artistID), albumid, songid)
 );
 
 COPY artists (artistID, artistName, albumID, albumName, albumImage, publishedYear, songID, songName, streams, length, popularity, addedToLibrary)
