@@ -1,37 +1,24 @@
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/spotify');
-
-const db = mongoose.connection;
-const { generateData } = require('../dataGeneration.js');
+const newRelic = require('newrelic');
+const { Client } = require('pg');
 
 
+const client = new Client({
+  user: 'malcolmjones',
+  host: 'localhost',
+  database: 'malcolmjones',
+  port: 5432
+})
+await client.connect();
 
-const ArtistSchema = new mongoose.Schema({
-  artistID: Number,
-  artistName: String,
-  albums: [{
-    albumID: Number,
-    albumName: String,
-    albumImage: String,
-    publishedYear: Number,
-    songs: [{
-      songID: Number,
-      songName: String,
-      streams: Number,
-      length: Number,
-      popularity: Number,
-      addedToLibrary: Boolean
-    }]
-  }]
-});
+const getArtist = async (artistID, cb) => {
+  let res = await client.query(`SELECT * FROM artists WHERE artistid = ${artistID};`);
+  //add error handling
+  cb(res);
 
-const Artist = mongoose.model('Artist', ArtistSchema);
-
-const getArtist = (artistID, cb) => {
-  Artist.find({ 'artistID': artistID }, (err, data) => {
-    if (err) throw err;
-    cb(data);
-  });
+  // Artist.find({ 'artistID': artistID }, (err, data) => {
+  //   if (err) throw err;
+  //   cb(data);
+  // });
 }
 
 const postArtist = (artistID, cb) => {
@@ -42,7 +29,7 @@ const postArtist = (artistID, cb) => {
     Artist.create(newArtist, (err, data) => {
       if (err) throw err;
       cb();
-    });
+    }); cons
   });
 }
 
