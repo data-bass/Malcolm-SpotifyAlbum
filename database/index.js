@@ -1,37 +1,64 @@
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://root:WissemGamra1@ds211143.mlab.com:11143/artists');
+const newRelic = require('newrelic');
+const { Client, Pool } = require('pg');
+const { createArtistInfoArray } = require('./creatingData/dataGeneration/createArtistInfo');
 
-const db = mongoose.connection;
-
-
-const ArtistSchema = new mongoose.Schema({
-  artistID: Number,
-  artistName: String,
-  albums: [{
-    albumID: Number,
-    albumName: String,
-    albumImage: String,
-    publishedYear: Number,
-    songs: [{
-      songID: Number,
-      songName: String,
-      streams: Number,
-      length: Number,
-      popularity: Number,
-      addedToLibrary: Boolean
-    }]
-  }]
+const pool = new Pool({
+  user: 'malcolmjones',
+  host: 'localhost',
+  database: 'malcolmjones',
+  max: 200,
+  port: 5432,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
 
-var Artist = mongoose.model('Artist', ArtistSchema);
+const getArtist = (artistID, cb) => {
+  const query = `SELECT * FROM artists WHERE artistid = ${artistID};`
+  pool.query(query, (err, data) => {
+    console.log(typeof data);
+    cb(data, null);
+  });
+};
 
-var getArtist = (id, cb) => {
-  Artist.find({'artistID': id}, (err, data) => {
+//turn artistsID into an array *********
+const postArtist = (artistID, cb) => {
+  const query = `INSERT INTO artists VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`;
+  // ADD AN AUTO INCRMENTER ************
+  const count = `SELECT COUNT (*) FROM artists`;
+  pool.query(count, (err, numOfRecords) => {
     if (err) throw err;
-    cb(data);
-  })
-}
+    newArtist = createArtistInfoArray();
+    newArtist[0] = numOfRecords + 1; // changes artistID
 
-module.exports.Artist = Artist;
-module.exports.db = db;
-module.exports.getArtist = getArtist;
+    // ******************
+    // NEED TO ADD CHANGE FOR ALBUMID
+    // NEED TO ADD CAHNGE FOR SONGID
+    // ******************
+
+    client.query(query, newArtist, (err, data) => {
+      if (err) throw err;
+      cb(err);
+    }); cons
+  });
+};
+//************************************ 
+// ******** Completely Refactor *******
+//************************************ 
+const updateArtist = (artistInfo, cb) => {
+  const { artistID, data } = artistInfo;
+  pool.query({ 'artistID': artistID }, data, (err, artists) => {
+    if (err) throw err;
+    cb();
+  });
+};
+//************************************ 
+// ******** Completely Refactor *******
+//************************************ 
+const deleteArtist = (artistID, cb) => {
+  Artist.deleteOne({ 'artistID': artistID }, (err) => {
+    if (err) throw err;
+    cb();
+  });
+};
+
+module.exports = { getArtist, postArtist, updateArtist, deleteArtist };

@@ -24,3 +24,12 @@ coverage
 build/
 dist/
 
+# Created data
+dataFiles/
+
+# Cassandra error messages
+database/importingData/cassandra/import_spotify_artists.err.20181006_000317
+
+#General Vscode Data
+.vscode/
+
