@@ -8,7 +8,6 @@ const numOfAlbums = 0;
 const numOfSongs = 0;
 const currentAlbumID = 0;
 
-
 const createArtist = () => {
   var artist = {
     artistID: numOfArtists,
@@ -43,5 +42,37 @@ const createSong = () => {
   return song;
 };
 
+const convertObjectToCsv = (obj) => {
+  const values = Object.values(obj);
+  const joinedValues = values.join('|') + '\n';
+  return joinedValues;
+};
 
-module.exports = { createArtist, createAlbum, createSong, convertObjectToCsv };
+const createArtistInfoArray = () => {
+  const artistValues = getValues(createArtist());
+  const albumValues = getValues(createAlbum());
+  const songValues = getValues(createSong());
+  let values = [artistValues, albumValues, songValues];
+  return flatten(values);
+};
+
+const getValues = (obj) => {
+  var valuesArray = [];
+  for (let key in obj) {
+    valuesArray.push(obj[key]);
+  }
+  return valuesArray;
+}
+
+const flatten = (outerArray) => {
+  let flattenedArray = [];
+  outerArray.map(innerArray => {
+    return innerArray.reduce((acc, val) => {
+      acc.push(val);
+      return acc;
+    }, flattenedArray);
+  });
+  return flattenedArray;
+}
+
+module.exports = { createArtist, createAlbum, createSong, convertObjectToCsv, createArtistInfoArray };
