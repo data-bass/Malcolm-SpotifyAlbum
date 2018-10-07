@@ -8,7 +8,7 @@ CREATE TABLE cassandraExport AS
   JOIN albums on albums.artistID = artists.artistID
   JOIN songs on songs.albumID = albums.albumID;
 
- COPY cassandraExport 
+ COPY cassandraExport
    TO '/Users/malcolmjones/Desktop/Malcolm-SpotifyAlbum/database/creatingData/dataFiles/csv/cassandraArtists/data0.csv' 
    DELIMITER '|' CSV HEADER;
 

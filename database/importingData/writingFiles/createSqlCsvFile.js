@@ -3,35 +3,29 @@ const coolImages = require('cool-images');
 const path = require('path');
 const fs = require('fs');
 
-var numOfArtists = 999990;
-var numOfAlbums = 1999980;
-var numOfSongs = 5999940;
+const { createArtist, createAlbum, createSong, convertObjectToCsv } = require('./../../creatingData/dataGeneration/createArtists');
 
-let dataFile = undefined;
-let dataFile2 = undefined;
-let dataFile3 = undefined;
-let dataStream = undefined;
-let dataStream2 = undefined;
-let dataStream3 = undefined;
+let numOfArtists = 0;
+let numOfAlbums = 0;
+let numOfSongs = 0;
+
+let artistFile = undefined;
+let artistStream = undefined;
+
+let albumFile = undefined;
+let albumStream = undefined;
+
+let songFile = undefined;
+let songStream = undefined;
 
 const artistHeaders = "artistID,artistName";
 const albumHeaders = "albumID,albumName,albumImage,publishedYear,artistID";
 const songHeaders = "songID,songName,streams,length,popularity,addedToLibrary,albumID";
 
-const convertObject = (obj) => {
-  const values = Object.values(obj);
-  const joinedValues = values.join('|') + '\n';
-  return joinedValues;
-}
-
 const createArtist = () => new Promise(async (resolve, reject) => {
-  let artist = {
-    artistID: numOfArtists,
-    artistName: faker.name.findName(),
-    // albums: await createAlbums(numOfArtists),
-  }
+  let artist = createArtist();
   await createAlbums(numOfArtists);
-  await dataStream.write(convertObject(artist), 'utf-8', () => { resolve(); });
+  await artistStream.write(convertObjectToCsv(artist), 'utf-8', () => { resolve(); });
   return artist;
 });
 
@@ -42,16 +36,11 @@ const createAlbums = () => new Promise(async (resolve, reject) => {
   const albumNumber = 2;
   for (var j = 1; j < albumNumber + 1; j++) {
     const currentAlbumID = (numOfArtists) * 1000 + j;
-    let album = {
-      albumID: numOfAlbums,
-      albumName: faker.random.words(),
-      albumImage: coolImages.one(400, 400),
-      publishedYear: Math.floor(Math.random() * 69) + 1950,
-      artistID: numOfArtists,
-      // songs: await createSongs(numOfAlbums),
-    }
+
+    let album = createAlbum();
     await createSongs(numOfAlbums);
-    await dataStream2.write(convertObject(album), 'utf-8', () => { resolve(); });
+    await albumStream.write(convertObjectToCsv(album), 'utf-8', () => { resolve(); });
+
     // albums.push(album);
     albumIDs.push('""' + numOfAlbums + '""');
     numOfAlbums++;
@@ -66,17 +55,9 @@ const createSongs = (currentAlbumID) => new Promise(async (resolve, reject) => {
   // var songNumber = Math.floor(Math.random() * 10) + 5;
   var songNumber = 3;
   for (var k = 1; k < songNumber + 1; k++) {
-    // const currentSongID = (numOfArtists) * 10000 + currentAlbumID * 100 + k;
-    let song = {
-      songID: numOfSongs,
-      songName: faker.random.words(),
-      streams: Math.floor(Math.random() * 250000),
-      length: Math.floor(Math.random() * 221) + 30,
-      popularity: Math.floor(Math.random() * 8) + 1,
-      addedToLibrary: faker.random.boolean(),
-      albumID: currentAlbumID,
-    }
-    await dataStream3.write(convertObject(song), 'utf-8', () => { resolve(); });
+    let song = createSong();
+    await songStream.write(convertObjectToCsv(song), 'utf-8', () => { resolve(); });
+
     // songs.push(song);
     songIDs.push('""' + numOfSongs + '""');
     numOfSongs++;
@@ -86,12 +67,14 @@ const createSongs = (currentAlbumID) => new Promise(async (resolve, reject) => {
 });
 
 const createFileStreams = (fileNumber) => {
-  dataFile = path.join(__dirname, `/dataFiles/csv/${'artists'}/data${fileNumber}.csv`);
-  dataFile2 = path.join(__dirname, `/dataFiles/csv/${'albums'}/data${fileNumber}.csv`);
-  dataFile3 = path.join(__dirname, `/dataFiles/csv/${'songs'}/data${fileNumber}.csv`);
-  dataStream = fs.createWriteStream(dataFile);
-  dataStream2 = fs.createWriteStream(dataFile2);
-  dataStream3 = fs.createWriteStream(dataFile3);
+  artistFile = path.join(__dirname, `/dataFiles/csv/${'artists'}/data${fileNumber}.csv`);
+  artistStream = fs.createWriteStream(artistFile);
+
+  albumFile = path.join(__dirname, `/dataFiles/csv/${'albums'}/data${fileNumber}.csv`);
+  albumStream = fs.createWriteStream(albumFile);
+
+  songFile = path.join(__dirname, `/dataFiles/csv/${'songs'}/data${fileNumber}.csv`);
+  songStream = fs.createWriteStream(songFile);
 };
 
 const writeHeaders = (headers, stream) => new Promise((resolve, reject) => {
@@ -115,15 +98,17 @@ const numOfFiles = 13;
 const startingFile = 11;
 const writeCsvFile = async () => {
   console.log('--------Starting the data generation script---------');
-  for (let j = startingFile; j < numOfFiles; j++) {
-    createFileStreams(j);
-    await Promise.all([writeHeaders(artistHeaders, dataStream), writeHeaders(albumHeaders, dataStream2), writeHeaders(songHeaders, dataStream3)]);
+  for (let currentFileNumber = startingFile; currentFileNumber < numOfFiles; currentFileNumber++) {
+    createFileStreams(currentFileNumber);
+    await Promise.all([writeHeaders(artistHeaders, artistStream), writeHeaders(albumHeaders, albumStream), writeHeaders(songHeaders, songStream)]);
+
     for (let i = 1; i < 100000; i++) {
       await createArtist();
       numOfArtists += 1;
     }
-    console.log(`Finished writing file ${j + 1}!`);
-    await Promise.all([closeFileStream(dataStream), closeFileStream(dataStream2), closeFileStream(dataStream3)]);
+
+    console.log(`Finished writing file ${currentFileNumber + 1}!`);
+    await Promise.all([closeFileStream(artistStream), closeFileStream(albumStream), closeFileStream(songStream)]);
   }
   console.log('-------Finished running the data generation script--------');
 }

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/spotify');
 
 const db = mongoose.connection;
-const { generateData } = require('../dataGeneration.js');
+const { generateData } = require('./creatingData/dataGeneration/createDataFiles');
 
 
 
@@ -42,7 +42,7 @@ const postArtist = (artistID, cb) => {
     Artist.create(newArtist, (err, data) => {
       if (err) throw err;
       cb();
-    });
+    });cons
   });
 }
 

@@ -10,7 +10,9 @@
   --   -- FOREIGN KEY (albums) REFERENCES albums(Album)
   -- );
 
-  -- -- -- COPY artists(artistID, artistName) FROM 'user/local/Desktop/Malcolm-SpotifyAlbum/database/creatingData/dataFiles/csv/artists/data0.csv' DELIMITER ',' CSV HEADER;
+-- COPY artists(artistID, artistName)
+-- FROM 'user/local/Desktop/Malcolm-SpotifyAlbum/database/creatingData/dataFiles/csv/artists/data0.csv'
+-- DELIMITER ',' CSV HEADER;
 
   -- CREATE TABLE albums (
   --   albumID int, 
@@ -36,7 +38,7 @@
   --   -- FOREIGN KEY (albumID) REFERENCES albums(albumID) 
   -- );
 
-  -- -- ALTER TABLE artists ADD FOREIGN KEY(albums) REFERENCES albums(albumID);
+  -- ALTER TABLE artists ADD FOREIGN KEY(albums) REFERENCES albums(albumID);
   -- ALTER TABLE albums ADD FOREIGN KEY(artistID) REFERENCES artists(artistID) ON DELETE CASCADE;
   -- ALTER TABLE songs ADD FOREIGN KEY(albumID) REFERENCES albums(albumID) ON DELETE CASCADE;
 
@@ -46,23 +48,28 @@
 -- join songs on albums.albumid=songs.albumid
 -- where artists.artistid=999888;
 
+-- Hash indexes on primary keys to further increase equality search speed
+CREATE INDEX primaryKeyHash
+ON artists 
+USING HASH (artistID);
 
--- Uneccessary indexes, already created as they are the primary keys
--- CREATE INDEX id
--- ON artists (artistid);
+CREATE INDEX primaryKeyHash
+ON albums 
+USING HASH (albumID);
 
--- CREATE INDEX id
--- ON albums (albumid);
+CREATE INDEX primaryKeyHash
+ON songs 
+USING HASH (songID);
 
--- CREATE INDEX id
--- ON songs (songid);
+-- Foreign key indexes to further increase equality search speed
+CREATE INDEX foreignKeyArtistHash
+ON albums 
+USING HASH (artistID);
 
+CREATE INDEX foreignKeySongHash
+ON albums 
+USING HASH (songID);
 
-
--- Indexes to increase search times
--- CREATE INDEX secondaryindex
--- ON albums (artistid);
-
-CREATE INDEX secondarysongindex
-ON songs (albumid);
-
+CREATE INDEX foreignKeyAlbumHash
+ON songs
+USING HASH (albumID);

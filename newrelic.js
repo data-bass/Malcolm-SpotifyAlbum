@@ -9,7 +9,7 @@ exports.config = {
   /**
    * Array of application names.
    */
-  app_name: ['Spotify Clone'],
+  app_name: ['Spotify'],
   /**
    * Your New Relic license key.
    */

@@ -22,5 +22,5 @@ COPY artists (artistID, artistName, albumID, albumName, albumImage, publishedYea
 FROM '/Users/malcolmjones/Desktop/Malcolm-SpotifyAlbum/database/creatingData/dataFiles/csv/cassandraArtists/data0.csv'
 WITH DELIMITER = '|' AND HEADER = TRUE;
 
-CREATE INDEX id
-ON artists (artistid);
+-- CREATE INDEX id
+-- ON artists (artistid);
