@@ -1,42 +1,42 @@
-  -- DROP TABLE IF EXISTS songs;
-  -- DROP TABLE IF EXISTS albums;
-  -- DROP TABLE IF EXISTS artists;
+--   DROP TABLE IF EXISTS songs;
+--   DROP TABLE IF EXISTS albums;
+--   DROP TABLE IF EXISTS artists;
 
-  -- CREATE TABLE artists (
-  --   artistID int,
-  --   artistName varchar(300),
-  --   -- albums integer[],
-  --   PRIMARY KEY (artistID)
-  --   -- FOREIGN KEY (albums) REFERENCES albums(Album)
-  -- );
+-- CREATE TABLE artists (
+--   artistID serial,
+--   artistName varchar(300),
+--   -- albums integer[],
+--   PRIMARY KEY (artistID)
+--   -- FOREIGN KEY (albums) REFERENCES albums(Album)
+-- );
 
 -- COPY artists(artistID, artistName)
 -- FROM 'user/local/Desktop/Malcolm-SpotifyAlbum/database/creatingData/dataFiles/csv/artists/data0.csv'
 -- DELIMITER ',' CSV HEADER;
 
-  -- CREATE TABLE albums (
-  --   albumID int, 
-  --   albumName varchar(300),
-  --   albumImage varchar(150),
-  --   publishedYear integer,
-  --   -- songs integer [],
-  --   artistID integer, 
-  --   PRIMARY KEY (albumID)
-  --   -- FOREIGN KEY (songs) REFERENCES songs(SongID),
-  --   -- FOREIGN KEY (artistID) REFERENCES artists(artistID)
-  -- );
+-- CREATE TABLE albums (
+--   albumID serial, 
+--   albumName varchar(300),
+--   albumImage varchar(150),
+--   publishedYear integer,
+--   -- songs integer [],
+--   artistID integer, 
+--   PRIMARY KEY (albumID)
+--   -- FOREIGN KEY (songs) REFERENCES songs(SongID),
+--   -- FOREIGN KEY (artistID) REFERENCES artists(artistID)
+-- );
 
-  -- CREATE TABLE songs (
-  --   songID int,
-  --   songName varchar(300),
-  --   streams integer,
-  --   length integer,
-  --   popularity integer,
-  --   addedToLibrary Boolean,
-  --   albumID integer,
-  --   PRIMARY KEY (songID)
-  --   -- FOREIGN KEY (albumID) REFERENCES albums(albumID) 
-  -- );
+-- CREATE TABLE songs (
+--   songID serial,
+--   songName varchar(300),
+--   streams integer,
+--   length integer,
+--   popularity integer,
+--   addedToLibrary Boolean,
+--   albumID integer,
+--   PRIMARY KEY (songID)
+--   -- FOREIGN KEY (albumID) REFERENCES albums(albumID) 
+-- );
 
   -- ALTER TABLE artists ADD FOREIGN KEY(albums) REFERENCES albums(albumID);
   -- ALTER TABLE albums ADD FOREIGN KEY(artistID) REFERENCES artists(artistID) ON DELETE CASCADE;
@@ -48,28 +48,66 @@
 -- join songs on albums.albumid=songs.albumid
 -- where artists.artistid=999888;
 
--- Hash indexes on primary keys to further increase equality search speed
-CREATE INDEX primaryKeyHash
-ON artists 
-USING HASH (artistID);
+-- Drop indices
+-- DROP INDEX IF EXISTS primaryKeyArtistHash
+DROP INDEX IF EXISTS primaryKeyAlbumHash;
+-- DROP INDEX IF EXISTS primaryKeySongHash;
 
-CREATE INDEX primaryKeyHash
+-- CREATE INDEX primaryKeyArtistBTree
+-- ON artists 
+-- USING BTREE (artistID);
+
+CREATE INDEX primaryKeyAlbumBTree
 ON albums 
-USING HASH (albumID);
+USING BTREE (albumID);
 
-CREATE INDEX primaryKeyHash
-ON songs 
-USING HASH (songID);
+-- CREATE INDEX primaryKeySongBTree
+-- ON songs 
+-- USING BTREE (songID);
 
--- Foreign key indexes to further increase equality search speed
-CREATE INDEX foreignKeyArtistHash
-ON albums 
-USING HASH (artistID);
+-- Hash indices on primary keys to further increase equality search speed
+-- CREATE INDEX primaryKeyArtistHash
+-- ON artists 
+-- USING HASH (artistID);
 
-CREATE INDEX foreignKeySongHash
-ON albums 
-USING HASH (songID);
+-- CREATE INDEX primaryKeyAlbumHash
+-- ON albums 
+-- USING HASH (albumID);
 
-CREATE INDEX foreignKeyAlbumHash
-ON songs
-USING HASH (albumID);
+-- CREATE INDEX primaryKeySongHash
+-- ON songs 
+-- USING HASH (songID);
+
+-- -- Foreign key indices to further increase equality search speed
+-- CREATE INDEX foreignKeyArtistHash
+-- ON albums 
+-- USING HASH (artistID);
+
+-- CREATE INDEX foreignKeySongHash
+-- ON albums 
+-- USING HASH (songID);
+
+-- CREATE INDEX foreignKeyAlbumHash
+-- ON songs
+-- USING HASH (albumID);
+
+-- -- Cluster albums based on their ArtistIds (Improves Speed)
+-- CLUSTER VERBOSE albums USING artistid;
+-- CLUSTER VERBOSE albums USING foreignKeyArtistHash;
+
+-- -- Clust songs based on their songIds (Improves Speed)
+-- CLUSTER VERBOSE songs USING albumid;
+
+
+-- -- To Re-cluster 
+-- CLUSTER albums;
+-- CLUSTER songs;
+
+-- ------------------------------
+-- ------------------------------
+-- ----DATABASE CONFIGURATION----
+-- ------------------------------
+-- ------------------------------
+
+-- -- Increase maintenance working memory (in KB)
+-- ALTER DATABASE malcolmjones SET maintenance_work_mem TO 128000; 
