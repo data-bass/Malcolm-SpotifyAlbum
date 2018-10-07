@@ -1,51 +1,64 @@
 const newRelic = require('newrelic');
-const { Client } = require('pg');
+const { Client, Pool } = require('pg');
+const { createArtistInfoArray } = require('./creatingData/dataGeneration/createArtistInfo');
 
-
-const client = new Client({
+const pool = new Pool({
   user: 'malcolmjones',
   host: 'localhost',
   database: 'malcolmjones',
-  port: 5432
-})
-await client.connect();
+  max: 200,
+  port: 5432,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+});
 
-const getArtist = async (artistID, cb) => {
-  let res = await client.query(`SELECT * FROM artists WHERE artistid = ${artistID};`);
-  //add error handling
-  cb(res);
+const getArtist = (artistID, cb) => {
+  const query = `SELECT * FROM artists WHERE artistid = ${artistID};`
+  pool.query(query, (err, data) => {
+    console.log(typeof data);
+    cb(data, null);
+  });
+};
 
-  // Artist.find({ 'artistID': artistID }, (err, data) => {
-  //   if (err) throw err;
-  //   cb(data);
-  // });
-}
-
+//turn artistsID into an array *********
 const postArtist = (artistID, cb) => {
-  Artist.count({}, (err, numOfRecords) => {
+  const query = `INSERT INTO artists VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`;
+  // ADD AN AUTO INCRMENTER ************
+  const count = `SELECT COUNT (*) FROM artists`;
+  pool.query(count, (err, numOfRecords) => {
     if (err) throw err;
-    let newArtist = generateData(1)[0];
-    newArtist.artistID = numOfRecords + 1;
-    Artist.create(newArtist, (err, data) => {
+    newArtist = createArtistInfoArray();
+    newArtist[0] = numOfRecords + 1; // changes artistID
+
+    // ******************
+    // NEED TO ADD CHANGE FOR ALBUMID
+    // NEED TO ADD CAHNGE FOR SONGID
+    // ******************
+
+    client.query(query, newArtist, (err, data) => {
       if (err) throw err;
-      cb();
+      cb(err);
     }); cons
   });
-}
-
+};
+//************************************ 
+// ******** Completely Refactor *******
+//************************************ 
 const updateArtist = (artistInfo, cb) => {
   const { artistID, data } = artistInfo;
-  Artist.findOneAndUpdate({ 'artistID': artistID }, data, (err, artists) => {
+  pool.query({ 'artistID': artistID }, data, (err, artists) => {
     if (err) throw err;
     cb();
   });
-}
-
+};
+//************************************ 
+// ******** Completely Refactor *******
+//************************************ 
 const deleteArtist = (artistID, cb) => {
   Artist.deleteOne({ 'artistID': artistID }, (err) => {
     if (err) throw err;
     cb();
   });
-}
+};
 
-module.exports = { db, Artist, getArtist, postArtist, updateArtist, deleteArtist };
+module.exports = { getArtist, postArtist, updateArtist, deleteArtist };
