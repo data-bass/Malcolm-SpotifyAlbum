@@ -33,3 +33,6 @@ database/importingData/cassandra/import_spotify_artists.err.20181006_000317
 #General Vscode Data
 .vscode/
 
+# New Relic API Key
+newrelic.js
+

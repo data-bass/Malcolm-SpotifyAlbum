@@ -11,8 +11,10 @@ server.use(express.urlencoded({ extended: true }));
 server.use(express.static(path.join(__dirname, '../public')));
 
 server.get('/artists/albums/:artistID', (req, res) => {
+  // console.log('I got a get request');
   getArtist(req.params.artistID, data => {
     res.status(200);
+    //res.redirect()
     res.send(data);
   });
 });

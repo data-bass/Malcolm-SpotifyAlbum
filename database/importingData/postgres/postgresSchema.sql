@@ -50,23 +50,26 @@
 
 -- Drop indices
 -- DROP INDEX IF EXISTS primaryKeyArtistHash
-DROP INDEX IF EXISTS primaryKeyAlbumHash;
+-- DROP INDEX IF EXISTS primaryKeyAlbumHash;
 -- DROP INDEX IF EXISTS primaryKeySongHash;
 
+
+-- Create Binary Tree Indices -------
 -- CREATE INDEX primaryKeyArtistBTree
 -- ON artists 
 -- USING BTREE (artistID);
 
-CREATE INDEX primaryKeyAlbumBTree
-ON albums 
-USING BTREE (albumID);
+-- CREATE INDEX primaryKeyAlbumBTree
+-- ON albums 
+-- USING BTREE (albumID);
 
 -- CREATE INDEX primaryKeySongBTree
 -- ON songs 
 -- USING BTREE (songID);
+---------------------------------
 
 -- Hash indices on primary keys to further increase equality search speed
--- CREATE INDEX primaryKeyArtistHash
+-- CREATE INDEX "primaryKeyArtistHash"
 -- ON artists 
 -- USING HASH (artistID);
 
@@ -92,12 +95,16 @@ USING BTREE (albumID);
 -- USING HASH (albumID);
 
 -- -- Cluster albums based on their ArtistIds (Improves Speed)
--- CLUSTER VERBOSE albums USING artistid;
--- CLUSTER VERBOSE albums USING foreignKeyArtistHash;
+-- CLUSTER VERBOSE albums USING "foreignKeyArtistHash";
+-- CLUSTER VERBOSE songs USING foreignKeyAlbumHash;
 
--- -- Clust songs based on their songIds (Improves Speed)
+-- Reindex the table can get bloated after many adds/deletes
+REINDEX TABLE artists;
+REINDEX TABLE albums;
+REINDEX TABLE songs;
+
+-- Cluster songs based on their songIds (Improves Speed)
 -- CLUSTER VERBOSE songs USING albumid;
-
 
 -- -- To Re-cluster 
 -- CLUSTER albums;
