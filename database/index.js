@@ -6,7 +6,7 @@ const pool = new Pool({
   user: 'malcolmjones',
   host: 'localhost',
   database: 'malcolmjones',
-  max: 200,
+  max: 500,
   port: 5432,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
@@ -15,8 +15,11 @@ const pool = new Pool({
 const getArtist = (artistID, cb) => {
   const query = `SELECT * FROM artists WHERE artistid = ${artistID};`
   pool.query(query, (err, data) => {
-    console.log(typeof data);
-    cb(data, null);
+    if (data) {
+      cb(data.rows[0]);
+    } else {
+      cb(undefined, null);
+    }
   });
 };
 
@@ -36,7 +39,7 @@ const postArtist = (artistID, cb) => {
     // ******************
 
     client.query(query, newArtist, (err, data) => {
-      if (err) throw err;
+      if (err) return console.error(err);
       cb(err);
     }); cons
   });
