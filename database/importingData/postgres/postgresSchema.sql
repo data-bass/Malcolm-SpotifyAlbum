@@ -1,3 +1,10 @@
+
+-- ------------------------------
+-- ------------------------------
+-- ------ Table Creation --------
+-- ------------------------------
+-- ------------------------------
+
 --   DROP TABLE IF EXISTS songs;
 --   DROP TABLE IF EXISTS albums;
 --   DROP TABLE IF EXISTS artists;
@@ -7,7 +14,6 @@
 --   artistName varchar(300),
 --   -- albums integer[],
 --   PRIMARY KEY (artistID)
---   -- FOREIGN KEY (albums) REFERENCES albums(Album)
 -- );
 
 -- COPY artists(artistID, artistName)
@@ -22,7 +28,6 @@
 --   -- songs integer [],
 --   artistID integer, 
 --   PRIMARY KEY (albumID)
---   -- FOREIGN KEY (songs) REFERENCES songs(SongID),
 --   -- FOREIGN KEY (artistID) REFERENCES artists(artistID)
 -- );
 
@@ -48,11 +53,17 @@
 -- join songs on albums.albumid=songs.albumid
 -- where artists.artistid=999888;
 
+
+-- ------------------------------
+-- ------------------------------
+-- ------- Table Indexing -------
+-- ------------------------------
+-- ------------------------------
+
 -- Drop indices
 -- DROP INDEX IF EXISTS primaryKeyArtistHash
 -- DROP INDEX IF EXISTS primaryKeyAlbumHash;
 -- DROP INDEX IF EXISTS primaryKeySongHash;
-
 
 -- Create Binary Tree Indices -------
 -- CREATE INDEX primaryKeyArtistBTree
@@ -65,7 +76,7 @@
 
 -- CREATE INDEX primaryKeySongBTree
 -- ON songs 
--- USING BTREE (songID);
+-- USING BTREE (song4ID);
 ---------------------------------
 
 -- Hash indices on primary keys to further increase equality search speed
@@ -99,9 +110,9 @@
 -- CLUSTER VERBOSE songs USING foreignKeyAlbumHash;
 
 -- Reindex the table can get bloated after many adds/deletes
-REINDEX TABLE artists;
-REINDEX TABLE albums;
-REINDEX TABLE songs;
+-- REINDEX TABLE artists;
+-- REINDEX TABLE albums;
+-- REINDEX TABLE songs;
 
 -- Cluster songs based on their songIds (Improves Speed)
 -- CLUSTER VERBOSE songs USING albumid;
@@ -110,11 +121,45 @@ REINDEX TABLE songs;
 -- CLUSTER albums;
 -- CLUSTER songs;
 
+
 -- ------------------------------
 -- ------------------------------
 -- ----DATABASE CONFIGURATION----
 -- ------------------------------
 -- ------------------------------
 
+
 -- -- Increase maintenance working memory (in KB)
 -- ALTER DATABASE malcolmjones SET maintenance_work_mem TO 128000; 
+
+
+-- ------------------------------
+-- ------------------------------
+-- ----Join Table Queries -------
+-- ------------------------------
+-- ------------------------------
+
+
+-- EXPLAIN ANALYZE -- To get timing/planner stats
+-- /timing in terminal -- For basic timing
+
+------ CURRENT FASTEST QUERY ----------
+-- Select * 
+-- from albums 
+-- join artists on artists.artistid=albums.artistid
+-- AND artists.artistid= 4134567
+-- join songs on albums.albumid = songs.albumid
+-- where albums.artistid = 4134567;      
+
+-- Former Fastest Query 
+-- SELECT * FROM artists
+-- INNER JOIN albums ON artists.artistid = albums.artistid
+-- INNER JOIN songs ON albums.albumid = songs.albumid
+-- WHERE artists.artistid = 3234567
+-- AND albums.artistid=3234567;
+
+-- Could Reconfigure table to be just two tables, reduces query time
+-- select * 
+-- from albums 
+-- join songs on albums.albumid = songs.albumid
+-- where albums.artistid = 8135579;
