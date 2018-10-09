@@ -1,4 +1,3 @@
-const newRelic = require('newrelic');
 const { Client, Pool } = require('pg');
 const { createArtistInfoArray } = require('./creatingData/dataGeneration/createArtistInfo');
 
@@ -12,16 +11,26 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
-const getArtist = (artistID, cb) => {
-  const query = `SELECT * FROM artists WHERE artistid = ${artistID};`
-  pool.query(query, (err, data) => {
-    if (data) {
-      cb(data.rows[0]);
-    } else {
-      cb(undefined, null);
-    }
+
+
+const getArtist = (artistID) => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT * FROM artists
+                    INNER JOIN albums ON artists.artistid = albums.artistid
+                    INNER JOIN songs ON albums.albumid = songs.albumid
+                    WHERE artists.artistid = 7863212;`
+    pool.query(query, (err, data) => {
+      if (data) {
+        resolve(data.rows[0]);
+        // cb(data.rows[0]);
+      } else {
+        // cb(undefined, null);
+      }
+    });
   });
 };
+
+
 
 //turn artistsID into an array *********
 const postArtist = (artistID, cb) => {
@@ -29,7 +38,7 @@ const postArtist = (artistID, cb) => {
   // ADD AN AUTO INCRMENTER ************
   const count = `SELECT COUNT (*) FROM artists`;
   pool.query(count, (err, numOfRecords) => {
-    if (err) throw err;
+    if (err) return console.error(err);
     newArtist = createArtistInfoArray();
     newArtist[0] = numOfRecords + 1; // changes artistID
 
