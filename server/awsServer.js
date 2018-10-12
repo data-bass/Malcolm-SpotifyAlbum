@@ -3,11 +3,13 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
 const toobusy = require('toobusy-js');
-// const newRelic = require('newrelic');
-// const server = require('./server.js');
+const request = require('superagent');
+
+const responseTime = require('response-time');
+const newRelic = require('newrelic');
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
-const { getArtist, postArtist, updateArtist, deleteArtist } = require('../database/awsIndex.js');
+const { getArtist, postArtist, updateArtist, deleteArtist, redisClient, getCache, setCache } = require('../database/awsIndex.js');
 const server = express();
 
 if (cluster.isMaster) {
@@ -43,6 +45,7 @@ server.use((rew, res, next) => {
   }
 });
 
+server.use(responseTime());
 
 server.use(bodyParser.json());
 server.use(cors());
@@ -50,15 +53,26 @@ server.use(express.urlencoded({ extended: true }));
 server.use(express.static(path.join(__dirname, '../public')));
 
 
-server.get('/artists/albums/:artistID', (req, res) => {
-  console.log('I got a get request');
-  getArtist(req.params.artistID).then(
-    data => {
-      res.status(200);
-      //res.redirect()
-      res.send(data);
-    });
-});
+// server.get('/artists/albums/:artistID', (req, res) => {
+//   console.log('I got a get request');
+//   const artistID = req.params.artistID;
+//   console.log(getCache)
+//   getCache(artistID).then(
+//     artistInfo => {
+//       console.log('made it out of promise hell');
+//       res.status(200);
+//       //res.redirect()
+//       res.send(artistInfo);
+//       setCache(artistID, artistInfo);
+//     });
+// });
+server.get('/artists/albums/:artistID', getCache, getArtist);
+// getArtist(req.params.artistID).then(
+//   data => {
+//     res.status(200);
+//     //res.redirect()
+//     res.send(data);
+//   });
 
 server.post('/artists/albums/:artistID', (req, res) => {
   const { artistID } = req.params;
@@ -86,4 +100,4 @@ server.delete('/artists/albums/:artistID', (req, res) => {
 });
 
 
-module.exports = server;
+module.exports = { server, redisClient };
