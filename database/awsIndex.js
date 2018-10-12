@@ -1,4 +1,18 @@
 const { Client, Pool } = require('pg');
+const redis = require('redis');
+const bluebird = require('bluebird');
+const redisClient = redis.createClient(6379, '18.191.213.186');
+
+redisClient.on('connect', () => {
+  console.log('Redis connected');
+  bluebird.promisifyAll(redisClient);
+});
+redisClient.on('ready', () => {
+  console.log('Redis ready');
+});
+redisClient.on('error', (err) => {
+  console.log('Redis error:', err.message);
+});
 
 const getValues = (obj) => {
   var valuesArray = [];
@@ -38,28 +52,87 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
-const getArtist = (artistID) => {
-  console.log('About to execute the get query');
-  return new Promise((resolve, reject) => {
-    // const query = `SELECT * FROM artists
-    //                 INNER JOIN albums ON artists.artistid = albums.artistid
-    //                 INNER JOIN songs ON albums.albumid = songs.albumid
-    //                 WHERE artists.artistid = ${artistID};`
+// const getArtist = (artistID) => {
+//   console.log('About to execute the get query');
+//   return new Promise((resolve, reject) => {
+//     // const query = `SELECT * FROM artists
+//     //                 INNER JOIN albums ON artists.artistid = albums.artistid
+//     //                 INNER JOIN songs ON albums.albumid = songs.albumid
+//     //                 WHERE artists.artistid = ${artistID};`
 
-    const query = `select * from artists where artists.artistid = ${artistID};`
-    pool.query(query, (err, data) => {
-      if (data) {
-        // console.log(data);
-        resolve(data.rows[0]);
-        // cb(data.rows[0]);
-      } else {
-        // resolve({ aritstName: 'No name here fam, error town' });
-        resolve(console.error(err));
-        // cb(undefined, null);
-      }
-    });
+//     const query = `select * from artists where artists.artistid = ${artistID};`
+//     pool.query(query, (err, data) => {
+//       if (data) {
+//         resolve(data.rows[0]);
+//       } else {
+//         resolve(console.error(err));
+//       }
+//     });
+//   });
+// };
+
+const getArtist = (req, res) => {
+  // const query = `SELECT * FROM artists
+  //                 INNER JOIN albums ON artists.artistid = albums.artistid
+  //                 INNER JOIN songs ON albums.albumid = songs.albumid
+  //                 WHERE artists.artistid = ${artistID};`
+  const artistID = req.params.artistID;
+  const query = `select * from artists where artists.artistid = ${artistID};`
+  pool.query(query, (err, data) => {
+    if (data) {
+      res.send(data.rows[0]);
+      setCache(artistID, data.rows[0]);
+      // resolve(data.rows[0]);
+    } else {
+      res.send(console.error(err));
+      // resolve(console.error(err));
+    }
   });
 };
+
+
+// const getCache = (artistID) => {
+//   console.log('about to execute the cache');
+//   return new Promise((resolve, reject) => {
+//     redisClient.getAsync(artistID).then((err, artistInfo) => {
+//       if (artistInfo) {
+//         resolve(artistInfo);
+//       } else {
+//         console.log('going to call get artist');
+//         getArtist(artistID).then(artistInfo => {
+//           resolve(artistInfo);
+//         }).catch(err => {
+//           res.send('There was an error with finding the artist you searched for!');
+//         });
+//       };
+//     });
+//   });
+// };
+
+const getCache = (req, res, next) => {
+  console.log(req.params);
+  const artistID = req.params.artistID;
+  redisClient.get(artistID, (err, data) => {
+    if (err) console.error(err);
+
+    if (data != null) {
+      console.log('got the response from redis');
+      res.send(data);
+    } else {
+      console.log('going to the artist server');
+      next();
+    }
+  });
+}
+
+const setCache = (artistID, artistInfo) => {
+  return new Promise((resolve, reject) => {
+    console.log(artistID);
+    const artist = JSON.stringify(artistInfo);
+    console.log(artistInfo);
+    redisClient.setex(artistID, 3600, artist);
+  });
+}
 
 
 
@@ -104,4 +177,4 @@ const deleteArtist = (artistID, cb) => {
   });
 };
 
-module.exports = { getArtist, postArtist, updateArtist, deleteArtist };
+module.exports = { getArtist, postArtist, updateArtist, deleteArtist, redisClient, getCache, setCache };
