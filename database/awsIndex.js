@@ -1,7 +1,9 @@
 const { Client, Pool } = require('pg');
 const redis = require('redis');
 const bluebird = require('bluebird');
-const redisClient = redis.createClient(6379, '18.191.213.186');
+const redisClient = redis.createClient(6379, '18.223.98.213');
+
+
 
 redisClient.on('connect', () => {
   console.log('Redis connected');
@@ -41,7 +43,7 @@ const createArtistInfoArray = () => {
   return flatten(values);
 };
 
-const pool = new Pool({
+let pool = new Pool({
   user: 'power_user',
   password: 'pass',
   host: '18.224.214.191',
@@ -52,8 +54,9 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
+bluebird.promisifyAll(pool);
+
 // const getArtist = (artistID) => {
-//   console.log('About to execute the get query');
 //   return new Promise((resolve, reject) => {
 //     // const query = `SELECT * FROM artists
 //     //                 INNER JOIN albums ON artists.artistid = albums.artistid
@@ -72,22 +75,17 @@ const pool = new Pool({
 // };
 
 const getArtist = (req, res) => {
-  // const query = `SELECT * FROM artists
-  //                 INNER JOIN albums ON artists.artistid = albums.artistid
-  //                 INNER JOIN songs ON albums.albumid = songs.albumid
-  //                 WHERE artists.artistid = ${artistID};`
-  const artistID = req.params.artistID;
-  const query = `select * from artists where artists.artistid = ${artistID};`
-  pool.query(query, (err, data) => {
+  // const artistID = req.params.artistID || 2222222;
+  const query = `SELECT * FROM artists
+                  INNER JOIN albums ON artists.artistid = albums.artistid
+                  INNER JOIN songs ON albums.albumid = songs.albumid
+                  WHERE artists.artistid = ${req.params.artistID};`
+  pool.queryAsync(query).then((data) => {
     if (data) {
       res.send(data.rows[0]);
-      setCache(artistID, data.rows[0]);
-      // resolve(data.rows[0]);
-    } else {
-      res.send(console.error(err));
-      // resolve(console.error(err));
+      setCache(req.params.artistID, data.rows[0]);
     }
-  });
+  }).catch(err => console.error(err));
 };
 
 
@@ -110,30 +108,25 @@ const getArtist = (req, res) => {
 // };
 
 const getCache = (req, res, next) => {
-  console.log(req.params);
-  const artistID = req.params.artistID;
-  redisClient.get(artistID, (err, data) => {
-    if (err) console.error(err);
-
+  // const artistID = req.params.artistID || 2222222;
+  redisClient.getAsync(req.params.artistID).then((data) => {
     if (data != null) {
-      console.log('got the response from redis');
+      // console.log('served from cache');
       res.send(data);
     } else {
-      console.log('going to the artist server');
       next();
     }
-  });
-}
+  }).catch(err => console.error(err));
+};
 
-const setCache = (artistID, artistInfo) => {
-  return new Promise((resolve, reject) => {
-    console.log(artistID);
-    const artist = JSON.stringify(artistInfo);
-    console.log(artistInfo);
-    redisClient.setex(artistID, 3600, artist);
-  });
-}
+let setCache = (artistID, artistInfo) => {
+  // return new Promise((resolve, reject) => {
+  // const artist = JSON.stringify(artistInfo);
+  redisClient.setex(artistID, 3600, JSON.stringify(artistInfo));
+  // });
+};
 
+setCache = bluebird.promisify(setCache);
 
 
 //turn artistsID into an array *********
